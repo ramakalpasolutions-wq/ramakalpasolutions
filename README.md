@@ -23,7 +23,7 @@ Other commands:
 | `npm run start` | Serve the production build locally |
 | `npm run lint` | ESLint |
 
-Without a Resend key, form submissions in `npm run dev` are printed in the terminal instead of emailed.
+Without SMTP settings, form submissions in `npm run dev` are printed in the terminal instead of emailed.
 
 ---
 
@@ -33,11 +33,19 @@ Set these in `.env.local` for local work, and in **Vercel → Project → Settin
 
 | Variable | Required | What it is |
 | --- | --- | --- |
-| `RESEND_API_KEY` | Yes | API key from [resend.com](https://resend.com) → API Keys |
-| `LEAD_TO_EMAIL` | Yes | Inbox that receives leads. Comma-separate for several |
-| `LEAD_FROM_EMAIL` | Recommended | Sender, e.g. `Ramakalpa Website <leads@ramakalpasolutions.in>`. The domain must be verified in Resend (Domains → Add domain, then add the DNS records it shows). Until then the site falls back to `onboarding@resend.dev`, which only delivers to your Resend account email |
+| `SMTP_HOST` | Yes | Mail server. Your domain's email is on Hostinger: `smtp.hostinger.com` |
+| `SMTP_PORT` | Yes | `465` (SSL, recommended) or `587` (STARTTLS) |
+| `SMTP_SECURE` | Yes | `true` for 465, `false` for 587 |
+| `SMTP_USER` | Yes | Full mailbox address, e.g. `customersupport@ramakalpasolutions.in` |
+| `SMTP_PASS` | Yes | That mailbox's password (set in Hostinger hPanel → Emails) |
+| `LEAD_TO_EMAIL` | Recommended | Inbox that receives leads. Comma-separate for several. Defaults to `SMTP_USER` |
+| `LEAD_FROM_EMAIL` | Optional | Sender, e.g. `Ramakalpa Website <customersupport@ramakalpasolutions.in>`. Must be the `SMTP_USER` mailbox, or Hostinger rejects the email. Defaults to `Ramakalpa Website <SMTP_USER>` |
 | `SHEETS_WEBHOOK_URL` | Optional | Google Apps Script web-app URL; every lead is also added as a row in a Google Sheet |
 | `NEXT_PUBLIC_GA_ID` | Optional | GA4 measurement ID (`G-XXXXXXXXXX`). Analytics loads only when this is set |
+
+Lead emails are sent with [Nodemailer](https://nodemailer.com) through your own mailbox (`src/lib/mailer.ts`), so there's no third-party email service to sign up for. Your domain's SPF record already allows Hostinger to send for `ramakalpasolutions.in`. If you also turn on DKIM in Hostinger (hPanel → Emails → your domain → DNS / DKIM), lead emails are even less likely to land in spam. When someone fills in their email on the form, clicking **Reply** in your inbox answers them directly.
+
+**Using a different mail provider?** Change `SMTP_HOST`/`SMTP_PORT`: Google Workspace is `smtp.gmail.com` with an App Password; Zoho is `smtp.zoho.in`.
 
 In production, if neither email nor the Sheet accepts a lead, the visitor sees an error asking them to call or WhatsApp, so leads are never silently lost.
 
@@ -150,7 +158,7 @@ All six pages use one template (`src/app/[location]/page.tsx`). To add a city, c
 
 - **Lead form** (`src/components/forms/LeadForm.tsx`): on Home, all service pages, local pages and Contact. Zod validation in the browser (loaded only on submit) and again on the server. It still works with JavaScript off.
 - **Spam protection**: a hidden honeypot field plus a per-IP limit of 5 submissions per 10 minutes (`src/lib/rate-limit.ts`). The limit is per server instance; for a strict global limit, swap in Upstash Redis.
-- **API**: `src/app/api/lead/route.ts` emails the lead with Resend, optionally posts it to the Sheet, then the visitor goes to `/thank-you/` (noindex).
+- **API**: `src/app/api/lead/route.ts` emails the lead with Nodemailer (SMTP), optionally posts it to the Sheet, then the visitor goes to `/thank-you/` (noindex).
 - **Exit-intent popup**: desktop only, after 8 seconds on a page, shown once per visitor (`localStorage`). Not shown on Contact or Thank-you.
 - **GA4 `generate_lead` events**: `method: "form"` on successful submits, `"whatsapp"` and `"call"` on any WhatsApp or `tel:` link click (`src/components/layout/Analytics.tsx`). In GA4, mark `generate_lead` as a key event.
 - **Pricing links** like `/contact/?service=app-development&plan=standard` pre-fill the form.

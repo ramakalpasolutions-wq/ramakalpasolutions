@@ -45,7 +45,7 @@ export default function PrivacyPolicyPage() {
       <p>We use trusted service providers to run our website and handle enquiries, including:</p>
       <ul>
         <li>Vercel (website hosting)</li>
-        <li>Resend (delivering enquiry emails to our team)</li>
+        <li>Hostinger (our email provider, which delivers enquiry emails to our team)</li>
         <li>Google (Analytics and, where used, Google Sheets for managing enquiries)</li>
       </ul>
       <p>These providers process data only on our instructions. We may also disclose information when required by law.</p>

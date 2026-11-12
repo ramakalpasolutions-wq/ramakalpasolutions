@@ -1,4 +1,4 @@
-import { Resend } from "resend";
+import { getMailer, leadRecipients, mailFrom } from "@/lib/mailer";
 import { siteConfig } from "@/config/site";
 import { fieldErrors, submissionSchema, type Submission } from "@/lib/lead-schema";
 import { rateLimit } from "@/lib/rate-limit";
@@ -31,11 +31,9 @@ function leadRows(lead: Submission): [string, string][] {
 }
 
 async function sendEmail(lead: Submission, rows: [string, string][]): Promise<boolean> {
-  const apiKey = process.env.RESEND_API_KEY;
-  const to = process.env.LEAD_TO_EMAIL;
-  if (!apiKey || !to) return false;
-
-  const from = process.env.LEAD_FROM_EMAIL || "Ramakalpa Website <onboarding@resend.dev>";
+  const mailer = getMailer();
+  const to = leadRecipients();
+  if (!mailer || to.length === 0) return false;
   const subject =
     lead.type === "audit"
       ? `New website audit request: ${lead.website}`
@@ -57,20 +55,22 @@ async function sendEmail(lead: Submission, rows: [string, string][]): Promise<bo
     .map(([k, v]) => `${k}: ${v}`)
     .join("\n");
 
-  const resend = new Resend(apiKey);
-  const { error } = await resend.emails.send({
-    from,
-    to: to.split(",").map((s) => s.trim()),
-    subject,
-    html,
-    text,
-    ...(lead.type === "lead" && lead.email ? { replyTo: lead.email } : {}),
-  });
-  if (error) {
-    console.error("[lead] Resend error:", error);
+  try {
+    await mailer.sendMail({
+      from: mailFrom(),
+      to,
+      subject,
+      html,
+      text,
+      // Hitting "Reply" in your inbox answers the customer directly.
+      ...(lead.type === "lead" && lead.email ? { replyTo: lead.email } : {}),
+    });
+    return true;
+  } catch (err) {
+    const e = err as { code?: string; responseCode?: number; message?: string };
+    console.error("[lead] SMTP error:", e.code ?? "", e.responseCode ?? "", e.message ?? err);
     return false;
   }
-  return true;
 }
 
 async function appendToSheet(lead: Submission, submittedAt: string): Promise<boolean> {
@@ -157,7 +157,7 @@ export async function POST(request: Request) {
   if (!emailed && !sheeted) {
     if (process.env.NODE_ENV !== "production") {
       // Local development without keys: show the lead in the terminal.
-      console.info("[lead] (not delivered: set RESEND_API_KEY and LEAD_TO_EMAIL)", { submittedAt, ...lead });
+      console.info("[lead] (not delivered: set SMTP_HOST, SMTP_USER and SMTP_PASS)", { submittedAt, ...lead });
     } else {
       console.error("[lead] Lead could not be delivered", { submittedAt, ...lead });
       return respond(isForm, request, 502, {

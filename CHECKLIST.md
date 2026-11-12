@@ -3,9 +3,9 @@
 Tick these off before pointing the domain at the new site.
 
 ## Accounts and keys
-- [ ] **Resend API key** → `RESEND_API_KEY` (resend.com → API Keys)
-- [ ] **Verify `ramakalpasolutions.in` in Resend** (Domains → add DNS records), then set `LEAD_FROM_EMAIL`
+- [ ] **SMTP mailbox password** → `SMTP_PASS` for the mailbox in `SMTP_USER` (Hostinger hPanel → Emails). Host and port are already filled in `.env.example`
 - [ ] **Lead inbox** → `LEAD_TO_EMAIL` (defaults to customersupport@ramakalpasolutions.in in `.env.example`)
+- [ ] Optional: turn on **DKIM** for the domain in Hostinger so lead emails don't land in spam
 - [ ] **GA4 measurement ID** → `NEXT_PUBLIC_GA_ID`, then mark `generate_lead` as a key event in GA4
 - [ ] Optional: **Google Sheet webhook** → `SHEETS_WEBHOOK_URL` (steps in README)
 - [ ] Send a test enquiry on the live site and confirm the email (and Sheet row) arrive
