@@ -6,7 +6,8 @@ Tick these off before pointing the domain at the new site.
 - [ ] **SMTP mailbox password** → `SMTP_PASS` for the mailbox in `SMTP_USER` (Hostinger hPanel → Emails). Host and port are already filled in `.env.example`
 - [ ] **Lead inbox** → `LEAD_TO_EMAIL` (defaults to customersupport@ramakalpasolutions.in in `.env.example`)
 - [ ] Optional: turn on **DKIM** for the domain in Hostinger so lead emails don't land in spam
-- [ ] **GA4 measurement ID** → `NEXT_PUBLIC_GA_ID`, then mark `generate_lead` as a key event in GA4
+- [x] **GA4 measurement ID** `G-M68PF9PNB7` added (`src/config/site.ts`)
+- [ ] In GA4 → Admin → Events, mark **`generate_lead`** as a key event (it appears after the first form, call or WhatsApp click on the live site)
 - [ ] Optional: **Google Sheet webhook** → `SHEETS_WEBHOOK_URL` (steps in README)
 - [ ] Send a test enquiry on the live site and confirm the email (and Sheet row) arrive
 

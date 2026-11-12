@@ -41,7 +41,7 @@ Set these in `.env.local` for local work, and in **Vercel → Project → Settin
 | `LEAD_TO_EMAIL` | Recommended | Inbox that receives leads. Comma-separate for several. Defaults to `SMTP_USER` |
 | `LEAD_FROM_EMAIL` | Optional | Sender, e.g. `Ramakalpa Website <customersupport@ramakalpasolutions.in>`. Must be the `SMTP_USER` mailbox, or Hostinger rejects the email. Defaults to `Ramakalpa Website <SMTP_USER>` |
 | `SHEETS_WEBHOOK_URL` | Optional | Google Apps Script web-app URL; every lead is also added as a row in a Google Sheet |
-| `NEXT_PUBLIC_GA_ID` | Optional | GA4 measurement ID (`G-XXXXXXXXXX`). Analytics loads only when this is set |
+| `NEXT_PUBLIC_GA_ID` | Optional | Overrides the GA4 ID `G-M68PF9PNB7` set in `src/config/site.ts`. Analytics loads only on the live site, not in `npm run dev` or Vercel preview links |
 
 Lead emails are sent with [Nodemailer](https://nodemailer.com) through your own mailbox (`src/lib/mailer.ts`), so there's no third-party email service to sign up for. Your domain's SPF record already allows Hostinger to send for `ramakalpasolutions.in`. If you also turn on DKIM in Hostinger (hPanel → Emails → your domain → DNS / DKIM), lead emails are even less likely to land in spam. When someone fills in their email on the form, clicking **Reply** in your inbox answers them directly.
 

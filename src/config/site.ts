@@ -52,6 +52,9 @@ export const siteConfig = {
   },
 
   areasServed: ["Guntur", "Vijayawada", "Andhra Pradesh", "India"],
+
+  /** Google Analytics 4 measurement ID. NEXT_PUBLIC_GA_ID overrides it if set. */
+  gaId: "G-M68PF9PNB7",
 } as const;
 
 /**

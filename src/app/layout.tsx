@@ -25,7 +25,10 @@ const dmSans = DM_Sans({
   display: "swap",
 });
 
-const GA_ID = process.env.NEXT_PUBLIC_GA_ID;
+const GA_ID = process.env.NEXT_PUBLIC_GA_ID || siteConfig.gaId;
+// Only real visits count: no analytics in `npm run dev` or on Vercel preview deployments.
+const LOAD_GA =
+  Boolean(GA_ID) && process.env.NODE_ENV === "production" && process.env.VERCEL_ENV !== "preview";
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteConfig.url),
@@ -75,12 +78,12 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <ExitIntent />
         <LeadClickTracker />
         <ScrollEffects />
-        {GA_ID && (
+        {LOAD_GA && (
           <>
             <Script id="ga-init" strategy="afterInteractive">
               {`window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','${GA_ID}');`}
             </Script>
-            <Script src={`https://www.googletagmanager.com/gtag/js?id=${GA_ID}`} strategy="lazyOnload" />
+            <Script src={`https://www.googletagmanager.com/gtag/js?id=${GA_ID}`} strategy="afterInteractive" />
           </>
         )}
       </body>
